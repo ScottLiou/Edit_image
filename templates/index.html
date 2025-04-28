@@ -1,32 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>日期圖片產生器</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    select { font-size: 16px; }
-    img { margin-top: 20px; width: 300px; height: auto; }
-    button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
-  </style>
+    <meta charset="utf-8">
+    <title><3Xuan</title>
 </head>
-<body>
-  <h1>選擇日期產出圖片</h1>
-  <form method="POST" action="/">
-    <select name="date">
-      {% for val, label in dates %}
-        <option value="{{ val }}" {% if image == val %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit">預覽圖片</button>
-  </form>
+<body style="text-align: center; font-family: Arial;">
 
-  {% if image %}
-    <img src="/download" alt="產生圖片" />
-    <form method="POST" action="/download">
-      <input type="hidden" name="date" value="{{ image }}">
-      <button type="submit">下載圖片</button>
-    </form>
-  {% endif %}
+<h2>選擇日期</h2>
+<form method="POST" action="/">
+    <input type="date" name="date" value="{{ selected_date }}">
+    <button type="submit">預覽</button>
+</form>
+
+<h3>快速選擇</h3>
+<form method="POST" action="/">
+    <input type="hidden" name="base_date" value="{{ selected_date }}">
+    <button name="delta" value="-2">-2</button>
+    <button name="delta" value="-1">-1</button>
+    <button name="delta" value="0">今日</button>
+    <button name="delta" value="1">+1</button>
+    <button name="delta" value="2">+2</button>
+</form>
+
+<h2>圖片預覽</h2>
+<img src="data:image/png;base64,{{ image_data }}" style="width:300px; height:300px;"/>
+
+<h3>下載圖片</h3>
+<form method="POST" action="/download">
+    <input type="hidden" name="date" value="{{ selected_date }}">
+    <button type="submit">下載圖片</button>
+</form>
+
 </body>
 </html>
