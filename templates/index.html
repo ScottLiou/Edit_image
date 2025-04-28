@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>日期圖片產生器</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    select { font-size: 16px; }
+    img { margin-top: 20px; width: 300px; height: auto; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>選擇日期產出圖片</h1>
+  <form method="POST" action="/">
+    <select name="date">
+      {% for val, label in dates %}
+        <option value="{{ val }}" {% if image == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">預覽圖片</button>
+  </form>
+
+  {% if image %}
+    <img src="/download" alt="產生圖片" />
+    <form method="POST" action="/download">
+      <input type="hidden" name="date" value="{{ image }}">
+      <button type="submit">下載圖片</button>
+    </form>
+  {% endif %}
+</body>
+</html>
