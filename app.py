@@ -1,8 +1,8 @@
+import os
 from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
 import io
-import os
 
 app = Flask(__name__)
 
@@ -72,3 +72,6 @@ def download():
             filename = f"output_{dt.month:02d}{dt.day:02d}.png"
             return send_file(img_io, as_attachment=True, download_name=filename, mimetype='image/png')
     return "生成失敗", 400
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
