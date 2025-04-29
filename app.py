@@ -30,7 +30,9 @@ def create_image(date_str, is_red=False):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    today = datetime.today()
+    current_date = today
+    return render_template('index.html', today=today)
 
 @app.route('/generate-image')
 def generate_image():
@@ -64,7 +66,9 @@ def download_image():
         img_io = io.BytesIO()
         img.save(img_io, 'PNG')
         img_io.seek(0)
-        return send_file(img_io, as_attachment=True, download_name=f"{date_str}_image.png", mimetype='image/png')
+        dt = datetime.today()
+        filename = f"output_{dt.month:02d}{dt.day:02d}_{dt.hour:02d}{dt.minute:02d}{dt.second:02d}.png"
+        return send_file(img_io, as_attachment=True, download_name=filename, mimetype='image/png')
     else:
         return "無法生成圖片", 500
 
