@@ -1,86 +1,72 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, send_file, request
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime, timedelta
+from datetime import datetime
 import io
-import base64
 
 app = Flask(__name__)
 
 FONT_NAME = "static/JasonHandwriting4.ttf"
 IMAGE_FILE = "static/S__14991387.jpg"
 
-def format_date(dt):
-    return f"{dt.month}/{dt.day}"
-
-def format_display_date(dt):
-    weekdays = ['一', '二', '三', '四', '五', '六', '日']
-    label = f"{dt.month}/{dt.day}({weekdays[dt.weekday()]})"
-    if dt.year != datetime.today().year:
-        label += f" - {dt.year}"
-    return label
-
-def is_holiday(dt):
-    return dt.weekday() >= 5
-
 def create_image(date_str, is_red=False):
-    img = Image.open(IMAGE_FILE).convert("RGB")
-    font = ImageFont.truetype(FONT_NAME, size=380)
-    draw = ImageDraw.Draw(img)
+    try:
+        img = Image.open(IMAGE_FILE).convert("RGB")
+    except FileNotFoundError:
+        return None
 
-    text = date_str + '休'
-    text_width, text_height = draw.textbbox((0, 0), text, font=font)[2:4]
+    try:
+        font = ImageFont.truetype(FONT_NAME, size=380)
+    except IOError:
+        return None
+
+    draw = ImageDraw.Draw(img)
+    text_width, text_height = draw.textbbox((0, 0), date_str + '休', font=font)[2:4]
     x = (img.width - text_width) // 2
     y = 270
     fill_color = (68, 31, 13) if is_red else (40, 20, 0)
-    draw.text((x, y), text, font=font, fill=fill_color)
+    draw.text((x, y), date_str + '休', font=font, fill=fill_color)
+
     return img
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    today = datetime.today()
-    current_date = today
+    return render_template('index.html')
 
-    if request.method == 'POST':
-        if 'date' in request.form:
-            current_date = datetime.strptime(request.form['date'], '%Y-%m-%d')
-        elif 'delta' in request.form:
-            delta = int(request.form['delta'])
-            base_date = datetime.strptime(request.form['base_date'], '%Y-%m-%d')
-            current_date = base_date + timedelta(days=delta)
+@app.route('/generate-image')
+def generate_image():
+    date_str = request.args.get('date', '')
+    if not date_str:
+        return "日期參數遺失", 400
 
-    date_only = format_date(current_date)
-    is_red = is_holiday(current_date)
-    img = create_image(date_only, is_red)
+    date_obj = datetime.strptime(date_str, '%m/%d')
+    is_red = date_obj.weekday() >= 5  # 週末為假日
+    img = create_image(date_str, is_red)
 
-    buf = io.BytesIO()
-    img.thumbnail((300, 300))
-    img.save(buf, format='PNG')
-    img_b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    if img:
+        img_io = io.BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        return send_file(img_io, mimetype='image/png')
+    else:
+        return "無法生成圖片", 500
 
-    full_date_list = [today + timedelta(days=i) for i in range(-365, 366)]
-    dates = [(d.strftime('%Y-%m-%d'), format_display_date(d)) for d in full_date_list]
+@app.route('/download')
+def download_image():
+    date_str = request.args.get('date', '')
+    if not date_str:
+        return "日期參數遺失", 400
 
-    return render_template(
-        'index.html',
-        image_data=img_b64,
-        selected_date=current_date.strftime('%Y-%m-%d'),
-        dates=dates,
-        current_date=current_date
-    )
+    date_obj = datetime.strptime(date_str, '%m/%d')
+    is_red = date_obj.weekday() >= 5  # 週末為假日
+    img = create_image(date_str, is_red)
 
-@app.route('/download', methods=['POST'])
-def download():
-    date = datetime.strptime(request.form['date'], '%Y-%m-%d')
-    date_only = format_date(date)
-    is_red = is_holiday(date)
-    img = create_image(date_only, is_red)
-    now = datetime.now()
-    filename = f"output_{date.month:02d}{date.day:02d}_{now.hour:02d}{now.minute:02d}{now.second:02d}.png"
-
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    buf.seek(0)
-    return send_file(buf, mimetype='image/png', as_attachment=True, download_name=filename)
+    if img:
+        img_io = io.BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        return send_file(img_io, as_attachment=True, download_name=f"{date_str}_image.png", mimetype='image/png')
+    else:
+        return "無法生成圖片", 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)
