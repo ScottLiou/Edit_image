@@ -8,7 +8,7 @@ app = Flask(__name__)
 FONT_NAME = "static/JasonHandwriting4.ttf"
 IMAGE_FILE = "static/S__14991387.jpg"
 
-def create_image(date_str, is_red=False):
+def create_image(date_str):
     try:
         img = Image.open(IMAGE_FILE).convert("RGB")
     except FileNotFoundError:
@@ -19,11 +19,18 @@ def create_image(date_str, is_red=False):
     except IOError:
         return None
 
+    # 將 "01/01" 或 "12/03" 類格式轉為 "1/1" 或 "12/3"
+    try:
+        date_obj = datetime.strptime(date_str, '%m/%d')
+        date_str = f"{date_obj.month}/{date_obj.day}"
+    except ValueError:
+        pass  # 若格式不符，保留原樣（避免崩潰）
+
     draw = ImageDraw.Draw(img)
     text_width, text_height = draw.textbbox((0, 0), date_str + '休', font=font)[2:4]
     x = (img.width - text_width) // 2
     y = 270
-    fill_color = (68, 31, 13) if is_red else (40, 20, 0)
+    fill_color = (66, 31, 12)
     draw.text((x, y), date_str + '休', font=font, fill=fill_color)
 
     return img
@@ -41,8 +48,7 @@ def generate_image():
         return "日期參數遺失", 400
 
     date_obj = datetime.strptime(date_str, '%m/%d')
-    is_red = date_obj.weekday() >= 5  # 週末為假日
-    img = create_image(date_str, is_red)
+    img = create_image(date_str)
 
     if img:
         img_io = io.BytesIO()
@@ -59,15 +65,14 @@ def download_image():
         return "日期參數遺失", 400
 
     date_obj = datetime.strptime(date_str, '%m/%d')
-    is_red = date_obj.weekday() >= 5  # 週末為假日
-    img = create_image(date_str, is_red)
+    img = create_image(date_str)
 
     if img:
         img_io = io.BytesIO()
         img.save(img_io, 'PNG')
         img_io.seek(0)
         dt = datetime.today()
-        filename = f"output_{dt.month:02d}{dt.day:02d}_{dt.hour:02d}{dt.minute:02d}{dt.second:02d}.png"
+        filename = f"output_{date_obj.month:02d}{date_obj.day:02d}_{dt.hour:02d}{dt.minute:02d}{dt.second:02d}.png"
         return send_file(img_io, as_attachment=True, download_name=filename, mimetype='image/png')
     else:
         return "無法生成圖片", 500
