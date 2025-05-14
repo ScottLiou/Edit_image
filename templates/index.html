@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日期圖片生成器</title>
+    <title>Lazy博美頭貼生成器</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,7 +31,13 @@
             font-size: 24px;
         }
 
-        input[type="date"], button {
+        .date-selector {
+            display: flex; 
+            gap: 12px; 
+            justify-content: center;
+            align-items: center;
+        }
+        input[type="date"],select, button {
             font-size: 18px;
             padding: 10px;
             margin: 10px 0;
@@ -43,12 +49,11 @@
             color: #333;
         }
 
-            input[type="date"]:focus, button:focus {
+            input[type="date"]:focus,select:focus, button:focus {
                 outline: none;
                 border-color: #a2c2bd;
                 box-shadow: 0 0 5px rgba(162, 194, 189, 0.5);
             }
-
         #image-preview {
             width: 100%;
             max-width: 350px;
@@ -77,8 +82,8 @@
                 white-space: nowrap;
                 cursor: pointer;
                 transition: background-color 0.2s ease;
-                font-family: 'JasonHandwriting4', cursive; /* 使用 JasonHandwriting4 字體 */
-                font-weight: bold; /* 設定粗體字 */
+                font-family: 'JasonHandwriting4', cursive;
+                font-weight: bold; 
             }
 
                 .quick-buttons button:active {
@@ -96,11 +101,12 @@
             .download-button:active {
                 background-color: #5a857a;
             }
-
         @media (max-width: 600px) {
-            input[type="date"], button {
-                font-size: 16px;
+            .input-row {
+                flex-direction: column;
             }
+        }
+        
         }
     </style>
 
@@ -112,6 +118,11 @@
         <!-- ✅ 日曆選擇器 -->
         <div class="date-selector">
             <input type="date" id="date-picker" onchange="onDatePicked()" />
+            <select id="type-select" onchange="onDatePicked()">
+                <option value="休">休假</option>
+                <option value="會議">會議</option>
+                <option value="課程">課程</option>
+            </select>
         </div>
 
         <!-- ✅ 快速選擇按鈕 -->
@@ -141,7 +152,8 @@
         }
 
         function showPreview(date) {
-            const imgSrc = `/generate-image?date=${formatDate(date)}`;
+            const type = document.getElementById("type-select").value;
+            const imgSrc = `/generate-image?date=${formatDate(date)}&type=${type}`;
             document.getElementById("image-preview").src = imgSrc;
         }
 
@@ -174,7 +186,8 @@
 
         function downloadImage() {
             const date = formatDate(currentDate);
-            const url = `/download?date=${date}`;
+            const type = document.getElementById("type-select").value;
+            const url = `/download?date=${date}&type=${type}`;
             const a = document.createElement('a');
             a.href = url;
             a.download = `output_${date.replace('/', '')}.png`;  // 設定下載的檔案名稱
