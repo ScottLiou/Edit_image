@@ -22,7 +22,7 @@ def create_image(date_str, event_type="休"):
 
     try:
         font = ImageFont.truetype(FONT_NAME, size=380)
-        activity_font = ImageFont.truetype(FONT_NAME, size=240) 
+        activity_font = ImageFont.truetype(FONT_NAME, size=250) 
     except IOError:
         return None
 
@@ -36,7 +36,7 @@ def create_image(date_str, event_type="休"):
     fill_color = (66, 31, 12)
     line_spacing = 250
 
-    if event_type in ["會議", "課程"]:
+    if event_type in ["會議", "內訓","外訓","公差","病假"]:
         # 畫「日期」文字
         date_width, date_height = draw.textbbox((0, 0), date_str, font=font)[2:4]
         date_x = (img.width - date_width) // 2 - 250

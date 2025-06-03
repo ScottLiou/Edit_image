@@ -10,8 +10,8 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            background-color: #e8f0f2; /* 柔和淺灰藍色 */
-            color: #333; /* 主文字顏色：深灰色 */
+            background-color: #e8f0f2; 
+            color: #333; 
         }
         @font-face {
             font-family: 'JasonHandwriting4';
@@ -20,14 +20,14 @@
         .container {
             max-width: 800px;
             margin: 20px auto;
-            background-color: #ebe0cd; /* 柔白色 */
+            background-color: #ebe0cd; 
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
 
         h1 {
-            color: #6c9c8e; /* 柔和綠松色 */
+            color: #6c9c8e; 
             font-size: 24px;
         }
 
@@ -45,7 +45,7 @@
             max-width: 350px;
             border-radius: 8px;
             border: 1px solid #ccc;
-            background-color: #f1f5f4; /* 柔淡綠灰 */
+            background-color: #f1f5f4; 
             color: #333;
         }
 
@@ -77,7 +77,7 @@
                 min-width: 40px;
                 border-radius: 10px;
                 border: 1px solid #ccc;
-                background-color: #6c9c8e; /* 柔和綠松色 */
+                background-color: #6c9c8e;
                 color: white;
                 white-space: nowrap;
                 cursor: pointer;
@@ -87,15 +87,15 @@
             }
 
                 .quick-buttons button:active {
-                    background-color: #d2e5e2; /* hover 柔和變色 */
+                    background-color: #d2e5e2; 
                 }
 
         .download-button {
-            background-color: #6c9c8e; /* 柔和綠松色 */
+            background-color: #6c9c8e; 
             color: white;
             border: none;
             transition: background-color 0.2s ease;
-            font-family: 'JasonHandwriting4', cursive; /* 使用 JasonHandwriting4 字體 */
+            font-family: 'JasonHandwriting4', cursive; 
         }
 
             .download-button:active {
@@ -121,7 +121,10 @@
             <select id="type-select" onchange="onDatePicked()">
                 <option value="休">休假</option>
                 <option value="會議">會議</option>
-                <option value="課程">課程</option>
+                <option value="內訓">內訓</option>
+                <option value="外訓">外訓</option>
+                <option value="病假">病假</option>
+                <option value="公差">公差</option>
             </select>
         </div>
 
@@ -141,7 +144,6 @@
         <button id="download-btn" class="download-button" onclick="downloadImage()">下載圖片</button>
     </div>
 
-    <!-- ✅ JS 放在 body 最後 -->
     <script>
         let currentDate = new Date();
 
@@ -190,7 +192,7 @@
             const url = `/download?date=${date}&type=${type}`;
             const a = document.createElement('a');
             a.href = url;
-            a.download = `output_${date.replace('/', '')}.png`;  // 設定下載的檔案名稱
+            a.download = `output_${date.replace('/', '')}.png`;  
             a.click();
         }
 
